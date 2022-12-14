@@ -1,10 +1,11 @@
 // TODO: Include packages needed for this application
 const inquirer = require('inquirer');
-const fs = require('fs');
+const renderLicenseBadge = require('./utils/generateMarkdown');
 
+const { writeFile } = require('fs').promises;
 // TODO: Create an array of questions for user input
-inquirer
-    .prompt([
+const promptUser = () => {
+    return inquirer.prompt([
         {
             name: 'projectTitle',
             type: 'input',
@@ -16,7 +17,7 @@ inquirer
             message: 'Give a brief decription of your project:',
         },
         {
-            name: 'instillationInstructions'
+            name: 'instillationInstructions',
             type: 'input',
             message: 'Give the user a brief instruction on installing your application:',
         },
@@ -36,27 +37,31 @@ inquirer
             message: 'Give the user instruction on Testing:',
         },
         {
-            name: 'badgeInfo',
-            type: '',
-            message: '',
+            name: 'license',
+            type: 'list',
+            message: 'What licence are you using for this project?',
+            choices: ['MIT', 'Apache', 'MPL 2.0', 'GPL', 'LGPL']
         },
         {
             name: 'github',
-            type: '',
-            message: '',
+            type: 'input',
+            message: 'Submit your Github Profile URL:',
         },
         {
             name: 'emailAddress',
-            type:  '',
-            message: '',
-        }
-    ])
+            type:  'input',
+            message: 'Submit your email address:',
+        },
+    ]);
+};
+
 
 // TODO: Create a function to write README file
-const generateReadme = ({projectTitle, badge, description, instillationInstructions, usageInfo, badgeInfo, contributionGuidelines, testingInstructions, github, emailAddress}) =>
-`${projectTitle}
+const generateReadme = ({projectTitle, description, instillationInstructions, usageInfo, license, contributionGuidelines, testingInstructions, github, emailAddress}) =>
+`
+${projectTitle}
 
-${badge}
+${renderLicenseBadge(license)}
 
 ## Description
 
@@ -81,7 +86,7 @@ ${usageInfo}
 
 ## License
 
-${badgeInfo}
+${license}
 
 ## How to Contribute
 
@@ -94,10 +99,15 @@ ${testingInstructions}
 ## Questions
 
 ${github}
-${emailAddress}`
+${emailAddress}`;
 
 // TODO: Create a function to initialize app
-function init() { }
+const init = () => {
+    promptUser()
+    .then((answers) => writeFile('README1.md', generateReadme(answers)))
+    .then(() => console.log('successfully created README1.md file'))
+    .catch((err) => console.log(err));
+}
 
 // Function call to initialize app
 init();
